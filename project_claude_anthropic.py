@@ -73,7 +73,7 @@ def process_response(response_content):
     try:
         for block in response_content.content:
             if hasattr(block, "type") and block.type == "text":
-                content = block.text.strip().replace("**", "").replace("\n", "").replace(';', ' ').replace('"', '')
+                content = block.text.strip().replace("**", "").replace("\n", "").replace(';', ' ').replace('"', ' ').replace('-', ' ')
 
                 # Extract Classification
                 classification = "No Smell" if "No Smell" in content else "With Smell"
@@ -89,7 +89,11 @@ def process_response(response_content):
                 if classification == "No Smell":
                     category = "Optimal"
                 elif classification == "With Smell":
-                    cats = ["Ambiguity", "Complexity", "Incoherence"]
+                    cats = ["Ambiguity","Complexity","Contradiction","Grammar",
+                            "Incoherence","Incompleteness","Inconsistency",
+                            "Inappropriateness","Misguidance","Overloading",
+                            "Parsing","Polysemy","Redundancy","Restriction",
+                            "Subjectivity","Vagueness"]
                     for cat in cats:
                         if cat.lower() in content.lower():
                             category = cat.capitalize()
@@ -147,15 +151,15 @@ def process_prompt_analysis(input_text, api_key, output_file, dataset_name="Unkn
     Returns:
         list: A list of dictionaries containing the analyzed prompt data.
     """
-    progress_bar()
-    smells_data = []
 
     if not api_key:
         st.error("API key not found!")
         return
 
-    # Define the prompt
-    prompt_template = load_prompt_template("prompt_template.txt")
+    progress_bar()
+    smells_data = []
+
+    prompt_template = load_prompt_template(PROMPT_TEMPLATE)
 
     message = [{"role": "user", "content": f"Prompt for analytics: {input_text}"}]
     messages = [{"system": prompt_template, "user": message}]
@@ -208,6 +212,9 @@ st.title("LLM Claude - Prompt Smell Identification")
 API_KEY = os.getenv("ANTHROPIC_API_KEY")
 api_key = Anthropic(api_key=API_KEY)
 output_file = "manifold_human_prompts_smells.csv"
+
+# Define the prompt
+PROMPT_TEMPLATE = os.getenv("PROMPT_TEMPLATE")
 
 # Input field for the prompt
 input_text = st.text_area("Enter the prompt for analysis", height=100)

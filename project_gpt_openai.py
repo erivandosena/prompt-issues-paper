@@ -69,7 +69,7 @@ def process_response(response_content):
         tuple: A tuple containing the raw content, classification, justification, and category.
     """
     try:
-        content = response_content.strip().replace("**", "").replace("\n", "").replace(';', ' ').replace('"', '')
+        content = response_content.strip().replace("**", "").replace("\n", "").replace(';', ' ').replace('"', ' ').replace('-', ' ')
 
         # Extract Classification
         classification = "No Smell" if "No Smell" in content else "With Smell"
@@ -85,7 +85,11 @@ def process_response(response_content):
         if classification == "No Smell":
             category = "Optimal"
         elif classification == "With Smell":
-            cats = ["Ambiguity", "Complexity", "Incoherence"]
+            cats = ["Ambiguity","Complexity","Contradiction","Grammar",
+                    "Incoherence","Incompleteness","Inconsistency",
+                    "Inappropriateness","Misguidance","Overloading",
+                    "Parsing","Polysemy","Redundancy","Restriction",
+                    "Subjectivity","Vagueness"]
             for cat in cats:
                 if cat.lower() in content.lower():
                     category = cat.capitalize()
@@ -150,8 +154,7 @@ def process_prompt_analysis(input_text, api_key, output_file, dataset_name="Unkn
         st.error("API key not found!")
         return
 
-    # Define the prompt
-    prompt_template = load_prompt_template("prompt_template.txt")
+    prompt_template = load_prompt_template(PROMPT_TEMPLATE)
 
     messages = [
         {"role": "system", "content": prompt_template},
@@ -212,6 +215,9 @@ st.title("LLM GPT - Prompt Smell Identification")
 # API configuration
 api_key = os.environ.get('OPENAI_API_KEY')
 output_file = "manifold_human_prompts_smells.csv"
+
+# Define the prompt
+PROMPT_TEMPLATE = os.getenv("PROMPT_TEMPLATE")
 
 # Input field for the prompt
 input_text = st.text_area("Enter the prompt for analysis", height=100)
