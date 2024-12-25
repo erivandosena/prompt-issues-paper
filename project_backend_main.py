@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import traceback
+from datetime import datetime
 from project_gpt_openai import process_prompt_analysis as gpt_process
 from project_gemini_google import process_prompt_analysis as gemini_process
 from project_ollama_nvidia import process_prompt_analysis as llama_process
@@ -25,8 +26,8 @@ MODELS = {
 }
 
 # Input and output files
-dataset_file = os.path.join(BASE_DIR, "manifold_human_prompts_sample_5_percent.csv")
-output_file = os.path.join(BASE_DIR, "manifold_human_prompts_smells_sample_5_percent.csv")
+dataset_file = os.path.join(BASE_DIR, "manifold_human_prompts_adjusted_sample_size_5.csv")
+output_file = os.path.join(BASE_DIR, "manifold_human_prompts_smells_adjusted_sample_size_5.csv")
 log_file = os.path.join(BASE_DIR, "log.txt")
 
 # Load initial dataset
@@ -45,14 +46,16 @@ prompts = df[~df['id'].isin(processed_ids)][['id', 'prompt', 'dataset']]
 
 def log_and_exit(message):
     """
-    Log an error message and exit the system.
+    Log an error message with a timestamp and exit the system.
 
     Args:
         message (str): Error message to log.
     """
     try:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_message = f"[{timestamp}] {message}"
         with open(log_file, "a", encoding="utf-8") as log:
-            log.write(message + "\n")
+            log.write(log_message + "\n")
     except OSError as e:
         print(f"\u26A0 Failed to write to log file: {e}")
     finally:
